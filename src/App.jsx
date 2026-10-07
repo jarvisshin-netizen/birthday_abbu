@@ -56,7 +56,7 @@ export default function App() {
       <Balloons />
 
       {/* Floating Audio Controller at Bottom Right */}
-      <AudioPlayer audioSrc="/assets/background-music.mp3" autoPlayTrigger={autoPlayMusic} />
+      <AudioPlayer autoPlayTrigger={autoPlayMusic} />
 
       {/* Clean & Festive Birthday Header */}
       <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-amber-200/60 px-4 py-3 shadow-sm">

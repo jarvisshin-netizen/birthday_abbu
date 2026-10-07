@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function AudioPlayer({ audioSrc = "/assets/background-music.mp3", autoPlayTrigger = false }) {
+export default function AudioPlayer({ audioSrc, autoPlayTrigger = false }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
 
+  const base = import.meta.env.BASE_URL || '/';
+  const finalAudioSrc = audioSrc || `${base}assets/background-music.mp3`;
+
   useEffect(() => {
-    const audio = new Audio(audioSrc);
+    const audio = new Audio(finalAudioSrc);
     audio.loop = true;
     audioRef.current = audio;
 
@@ -23,16 +26,21 @@ export default function AudioPlayer({ audioSrc = "/assets/background-music.mp3",
       setDuration(audio.duration);
     });
 
+    audio.addEventListener('play', () => setIsPlaying(true));
+    audio.addEventListener('pause', () => setIsPlaying(false));
+
     return () => {
       audio.removeEventListener('timeupdate', updateProgress);
       audio.pause();
       audio.src = '';
     };
-  }, [audioSrc]);
+  }, [finalAudioSrc]);
 
   useEffect(() => {
     if (autoPlayTrigger && audioRef.current && !isPlaying) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => {
+        console.warn("Autoplay blocked:", e);
+      });
     }
   }, [autoPlayTrigger]);
 
@@ -42,8 +50,10 @@ export default function AudioPlayer({ audioSrc = "/assets/background-music.mp3",
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => {
-        console.warn("Audio play prevented:", e);
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((e) => {
+        console.error("Audio playback error:", e);
       });
     }
   };
